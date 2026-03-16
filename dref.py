@@ -1,68 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
 from scipy.fft import fft, fftshift
-from scipy.signal import hilbert
+from scipy.interpolate import interp1d
 import hapi as hp
-
-c = 3e8
-tau = 50e-15
-lambda0 = 5e-6
-w0 = 2 * np.pi * c / lambda0
-lambda_phases = 6.23e-7
-p_sat = 0.0276
-filename = "POS_SCAN_19.23.34.txt"
-
-w_size = 100
-data = np.loadtxt(filename)
-
-phases = data[:,0]
-signal = data[:,1]
-
-delay = phases/(2*np.pi) * lambda_phases / c
-
-idx = np.argsort(delay)
-delay = delay[idx]
-signal = signal[idx]
-
-delay_min = -1e-11
-delay_max = 1e-11  
-mask = (delay >= delay_min) & (delay <= delay_max)
-delay = delay[mask]
-signal = signal[mask]
-print(f"Обрезано с {len(data)} до {len(delay)} точек")
-
-# Усреднение фона
-ker = np.ones(w_size)/w_size
-background = np.convolve(signal, ker, mode='same')
-signal = signal - background
-
-plt.figure()
-plt.plot(delay, signal)
-plt.xlabel("Delay (s)")
-plt.ylabel("Signal")
-plt.title("Signal after moving average subtraction")
-plt.grid()
-plt.show()
-
-N = len(delay)
-delay_uniform = np.linspace(delay.min(), delay.max(), N)
-interp = interp1d(delay, signal, kind='linear')
-signal_uniform = interp(delay_uniform)
-
-window = np.hanning(N)
-signal_uniform = signal_uniform
-
-spec = np.fft.rfft(signal_uniform)
-dt = delay_uniform[1] - delay_uniform[0]
-freq = np.fft.rfftfreq(N, dt)
-spectrum = np.abs(spec)
-
-plt.figure()
-plt.plot(delay_uniform, signal_uniform)
-plt.xlim(delay_min, delay_max)
-
-
 tau = 50e-15  #сдлительность импульса
 lambda0 = 5e-6  # центральная длина волны
 c = 299792458
@@ -83,10 +23,10 @@ f_width = 0.05e13
 
 temperature = 296.0  # K (23 °C)
 pressure = 1.0  #атм, общее давление
-relative_humidity = 50
+relative_humidity = 24
 # Давление насыщенного пара при 23°C ~ 0.0276 атм
 p_sat = 0.0276  #атм
-path_l = 150.0  #длина пути в среде, см
+path_l = 300.0  #длина пути в среде, см
 p_ref = 1.0
 hp.db_begin('hitran_ata')
 nu_min = 1500.0  # см^-1   ~ 6.67 мкм
@@ -138,20 +78,4 @@ plt.ylabel('Интенсивность (с учётом поглощения)')
 plt.title('Спектр импульсов (последняя задержка)')
 plt.grid(True)
 plt.tight_layout()
-plt.show()
-
-
-
-
-
-
-plt.figure()
-plt.plot(freq, spectrum, label="Spectrum")
-plt.plot(f[f_min_idx:f_max_idx] - 0.95e13, (spec_slice * max(spectrum)) / (max(spec_slice)),  label="t")
-
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Amplitude")
-plt.xlim(0.45e14, 0.65e14)
-plt.legend()
-plt.grid()
 plt.show()
