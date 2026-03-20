@@ -6,14 +6,13 @@ from scipy.signal import savgol_filter
 import hapi as hp
 import os
 
-# ================== КОНСТАНТЫ ==================
+
 c = 299792458
 tau = 50e-15
 lambda0 = 5e-6
 w0 = 2 * np.pi * c / lambda0
 lambda_phases = 6.23e-7
 p_sat = 0.0276
-# ================== ЧТЕНИЕ И ОБРАБОТКА ==================
 data = np.loadtxt('POS_SCAN_19.47.54.txt')
 phases = data[:, 0]
 amplitude = data[:, 1] if data.shape[1] > 1 else np.ones_like(phases)
@@ -132,7 +131,7 @@ def compute_and_plot_for_RH(relative_humidity, frame_id):
     #plt.savefig(os.path.join(out_dir, f"fr_{frame_id:03d}.png"), dpi=100)
     #plt.close(fig)
 
-# ЗАПУСК HAPI + интерференция
+
 frame_id = 0
 for RH in range(20, 21, 1):
     print(f"RH = {RH}%, реальные задержки")

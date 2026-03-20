@@ -1,26 +1,26 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.fft import fft, rfft, rfftfreq
 from scipy.interpolate import interp1d
-from scipy.fft import fft, fftshift, rfft, rfftfreq
-from scipy.signal import hilbert
+
 import hapi as hp
 
-c = 299792458          # скорость света, м/с
-tau = 50e-15           # длительность импульса, с
-lambda0 = 6.2e-6       # центральная длина волны, м
+c = 299792458  # скорость света, м/с
+tau = 50e-15  # длительность импульса, с
+lambda0 = 6.2e-6  # центральная длина волны, м
 w0 = 2 * np.pi * c / lambda0
 lambda_phases = 6.23e-7
 p_sat = 0.0276
-filename = "POS_SCAN_19.23.34.txt"
+filename = 0
 
 w_size = 100
 data = np.loadtxt(filename)
 
-phases = data[:,0]
-signal = data[:,1]
+phases = data[:, 0]
+signal = data[:, 1]
 
 # задержка в секундах
-delay = phases/(2*np.pi) * lambda_phases / c
+delay = phases / (2 * np.pi) * lambda_phases / c
 
 idx = np.argsort(delay)
 delay = delay[idx]
@@ -35,7 +35,7 @@ signal = signal[mask]
 print(f"Обрезано с {len(data)} до {len(delay)} точек")
 
 # усреднение фона
-ker = np.ones(w_size)/w_size
+ker = np.ones(w_size) / w_size
 background = np.convolve(signal, ker, mode='same')
 signal = signal - background
 
@@ -64,26 +64,23 @@ spec_exp = rfft(signal_uniform)
 freq = rfftfreq(N, dt)
 spectrum = np.abs(spec_exp)
 
-
-
 # хотим, чтобы T было ≈ 2T_exp, dt_model = dt (та же дискретизация)
-T = 10e-12        # полуширина окна, с
-dt_model = dt     # шаг по времени = шаг эксперимента
+T = 10e-12  # полуширина окна, с
+dt_model = dt  # шаг по времени = шаг эксперимента
 t_model = np.arange(-T, T + dt_model, dt_model)
 N_model = len(t_model)
 
 # импульс
-pulse1 = np.exp(-t_model**2 / (2 * tau**2)) * np.sin(w0 * t_model)
+pulse1 = np.exp(-t_model ** 2 / (2 * tau ** 2)) * np.sin(w0 * t_model)
 
 # спектр (полный FFT, затем rfft‑аналог по положительным частотам)
 spec_model_full = fft(pulse1)
-spec_model_intensity = np.abs(spec_model_full)**2
+spec_model_intensity = np.abs(spec_model_full) ** 2
 
 # положительные частоты для модели
 df_model = 1 / (2 * T)
 f_model = np.fft.fftfreq(N_model, dt_model)
-f_model = np.fft.fftshift(f_model)[N_model//2:]
-
+f_model = np.fft.fftshift(f_model)[N_model // 2:]
 
 temperature = 296.0
 pressure = 1.0
@@ -133,7 +130,6 @@ spec_slice = spec_model_intensity[f_min_idx:f_max_idx]
 T_on_slice = T_on_f_model[f_min_idx:f_max_idx]
 spec_with_abs = spec_slice * T_on_slice
 
-
 # теоретический спектр на частотной сетке f_model (в диапазоне [f_min, f_max])
 f_interp = f_model[f_min_idx:f_max_idx]
 y_interp = spec_with_abs
@@ -156,7 +152,6 @@ spec_model_on_freq = interp_model(freq_small)
 
 # нормируем экспериментальный спектр
 spectrum_norm = spectrum[mask_freq] / np.max(spectrum[mask_freq])
-
 
 plt.figure(figsize=(10, 4))
 plt.plot(freq[mask_freq], spectrum_norm, label="Экспериментальный спектр")
