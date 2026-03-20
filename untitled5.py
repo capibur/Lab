@@ -65,9 +65,6 @@ freq = rfftfreq(N, dt)
 spectrum = np.abs(spec_exp)
 
 
-# ====================================================================
-# МОДЕЛЬНЫЙ ИМПУЛЬС И ЕГО СПЕКТР на той же сетке dt
-# ====================================================================
 
 # хотим, чтобы T было ≈ 2T_exp, dt_model = dt (та же дискретизация)
 T = 10e-12        # полуширина окна, с
@@ -85,7 +82,7 @@ spec_model_intensity = np.abs(spec_model_full)**2
 # положительные частоты для модели
 df_model = 1 / (2 * T)
 f_model = np.fft.fftfreq(N_model, dt_model)
-f_model = np.fft.fftshift(f_model)[N_model//2:]  # берем положительные частоты
+f_model = np.fft.fftshift(f_model)[N_model//2:]
 
 
 temperature = 296.0

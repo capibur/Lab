@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 import hapi as hp
 import os
 
-# ================== 0. ПАРАМЕТРЫ СИГНАЛА ==================
+
 tau = 50e-15
 lambda0 = 5e-6
 c = 299792458
@@ -38,14 +38,14 @@ f_max = 7e13
 f_min_idx = np.argmin(np.abs(f - f_min))
 f_max_idx = np.argmin(np.abs(f - f_max))
 
-# ================== 1. ПАРАМЕТРЫ СРЕДЫ ==================
+
 temperature = 296.0
 p_total = 1.0
 p_sat = 0.0276
 path_l = 300.0
 p_ref = 1.0
 
-# ================== 2. HITRAN / HAPI ==================
+
 hp.db_begin('hitran_data')
 nu_min = 1500.0
 nu_max = 2500.0
@@ -64,10 +64,7 @@ f_cm1 = f / c * 1e-2
 delays = np.arange(0, 10000) * 1e-15
 
 
-# ================== НАША ФУНКЦИЯ ПРЯМОГО ИНТЕГРАЛЬНОГО ФУРЬЕ ==================
-# *** ДОБАВЬ В НАЧАЛО после определения t, f ***
-# ================== ОГРАНИЧЕНИЕ ИНТЕРВАЛА ==================
-# ВРЕМЕННОЙ интервал (убираем "хвосты" где pulse~0)
+
 t_mask = np.abs(t) < 9 * tau  # ±9×tau — 99.9% энергии гаусса
 t_cropped = t[t_mask]
 print(f"Обрезана сетка: {len(t)} → {len(t_cropped)} точек ({len(t_cropped) / len(t) * 100:.1f}%)")
@@ -77,31 +74,30 @@ f_slice = f[(f >= f_min) & (f <= f_max)]
 omega_slice = 2 * np.pi * f_slice  # только нужные частоты!
 print(f"Частоты: {len(f)} → {len(f_slice)}")
 
-# Пересчитываем веса только для обрезанной сетки
 dt_weights_crop = np.zeros_like(t_cropped)
 dt_weights_crop[1:-1] = 0.5 * (t_cropped[2:] - t_cropped[:-2])
 dt_weights_crop[0] = t_cropped[1] - t_cropped[0]
 dt_weights_crop[-1] = t_cropped[-1] - t_cropped[-2]
 
-# индексы для T_on_f_grid
+
 f_slice_idx = np.where((f >= f_min) & (f <= f_max))[0]
 
 
-# ================== ИЗМЕНЁННАЯ ФУНКЦИЯ ФУРЬЕ ==================
+
 def nonuniform_fourier_integral_fast(t_crop, f_t_crop, omega_crop, dt_weights_crop):
     """ОБРЕЗАННАЯ версия — в 10 раз быстрее!"""
     phase = np.exp(-1j * np.outer(omega_crop, t_crop))  # теперь маленький!
     return phase @ (f_t_crop * dt_weights_crop)
 
 
-# ================== ИЗМЕНЁННАЯ ГЛАВНАЯ ФУНКЦИЯ ==================
+
 def compute_and_plot_for_RH(relative_humidity, frame_id):
     p_h2o = (relative_humidity / 100.0) * p_sat
     k_hitran = k_ref * (p_h2o / p_ref)
     tr_h = np.exp(-k_hitran * path_l)
 
     interp_T = interp1d(nu_hitran, tr_h, kind='linear', bounds_error=False, fill_value=1.0)
-    T_on_f_slice = interp_T(f_slice / c * 1e-2)  # только для среза!
+    T_on_f_slice = interp_T(f_slice / c * 1e-2)  #
 
     res_spec = []
     for delay in delays:
@@ -134,7 +130,7 @@ def compute_and_plot_for_RH(relative_humidity, frame_id):
         res_spec2d.append(spec_delay_slice)
     res_spec2d = np.array(res_spec2d).T
 
-    # график (убрал сравнение для скорости)
+    # график
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
     axes[0].plot(f_slice * 1e-12, res_spec[-1])
@@ -154,7 +150,7 @@ def compute_and_plot_for_RH(relative_humidity, frame_id):
     plt.close(fig)
 
 
-# ================== ЗАПУСК ==================
+
 frame_id = 0
 for RH in range(0, 50,4 ):
     print(f"RH = {RH}%, неравномерная сетка")
