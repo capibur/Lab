@@ -46,7 +46,7 @@ path_l = 300.0
 p_ref = 1.0
 
 
-hp.db_begin('hitran_data')
+hp.db_begin('3')
 nu_min = 1500.0
 nu_max = 2500.0
 hp.fetch('H2O', 1, 1, nu_min, nu_max)
