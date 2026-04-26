@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.fft import fft, fftshift
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
-import hapi as hp
+import task_two.hapi as hp
 import os
 
 

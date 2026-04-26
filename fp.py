@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.fft import fft, fftshift
 from scipy.signal import hilbert
-import hapi as hp
+import task_two.hapi as hp
 
 # ---------------- Блок: загрузка и подготовка экспериментальных данных ----------------
 c = 299792458

@@ -5,7 +5,7 @@ import numpy as np
 from scipy.fft import fft, rfft, rfftfreq
 from scipy.interpolate import interp1d
 
-import hapi as hp
+import task_two.hapi as hp
 
 temperature = 296.0
 pressure = 1.0

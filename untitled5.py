@@ -3,7 +3,7 @@ import numpy as np
 from scipy.fft import fft, rfft, rfftfreq
 from scipy.interpolate import interp1d
 
-import hapi as hp
+import task_two.hapi as hp
 
 c = 299792458  # скорость света, м/с
 tau = 50e-15  # длительность импульса, с
